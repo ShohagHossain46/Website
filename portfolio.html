@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shohag Hossain — Fuel Management &amp; CHP Operations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14181C;
+    --panel:#1B2126;
+    --panel-2:#20272D;
+    --line:#2B343B;
+    --amber:#E8871E;
+    --green:#4A9B6E;
+    --text:#EDEAE2;
+    --muted:#8A94A0;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --disp: 'Oswald', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.6;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:48px 48px;
+    background-attachment:fixed;
+  }
+  a{color:inherit;}
+  ::selection{background:var(--amber); color:#14181C;}
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--amber);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px; height:6px;
+    background:var(--amber);
+    display:inline-block;
+  }
+
+  /* ===== Layout shell ===== */
+  .shell{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    min-height:100vh;
+  }
+  @media (max-width:900px){
+    .shell{grid-template-columns:1fr;}
+  }
+
+  /* ===== Sidebar ===== */
+  nav.rail{
+    position:sticky; top:0; height:100vh;
+    background:var(--panel);
+    border-right:1px solid var(--line);
+    padding:32px 24px;
+    display:flex; flex-direction:column;
+    gap:36px;
+  }
+  @media (max-width:900px){
+    nav.rail{position:relative; height:auto; border-right:none; border-bottom:1px solid var(--line);}
+  }
+  .brand{
+    font-family:var(--disp);
+    font-weight:600;
+    font-size:20px;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+  }
+  .brand span{color:var(--amber);}
+  .rail-links{list-style:none; display:flex; flex-direction:column; gap:2px;}
+  .rail-links a{
+    font-family:var(--mono);
+    font-size:12.5px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--muted);
+    text-decoration:none;
+    padding:10px 10px;
+    border-left:2px solid transparent;
+    transition:.15s;
+  }
+  .rail-links a:hover{color:var(--text); border-left-color:var(--amber); background:var(--panel-2);}
+  .rail-foot{
+    margin-top:auto;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    line-height:1.8;
+  }
+  .rail-foot .dot{color:var(--green);}
+
+  main{padding:0;}
+
+  section{
+    padding:72px 56px;
+    border-bottom:1px solid var(--line);
+  }
+  @media (max-width:700px){
+    section{padding:48px 22px;}
+  }
+
+  h2.section-title{
+    font-family:var(--disp);
+    font-weight:600;
+    font-size:34px;
+    text-transform:uppercase;
+    letter-spacing:.01em;
+    margin:10px 0 34px;
+  }
+
+  /* ===== Hero / status panel ===== */
+  .hero{
+    padding:0;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-inner{padding:64px 56px 40px;}
+  @media (max-width:700px){.hero-inner{padding:40px 22px 28px;}}
+  .hero h1{
+    font-family:var(--disp);
+    font-weight:700;
+    font-size:clamp(40px, 6vw, 76px);
+    text-transform:uppercase;
+    line-height:.98;
+    margin:14px 0 6px;
+  }
+  .hero .role{
+    font-family:var(--mono);
+    color:var(--muted);
+    font-size:15px;
+    letter-spacing:.03em;
+    margin-bottom:36px;
+  }
+  .status-panel{
+    border:1px solid var(--line);
+    background:var(--panel);
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+  }
+  @media (max-width:700px){.status-panel{grid-template-columns:repeat(2, 1fr);}}
+  .status-cell{
+    padding:20px 22px;
+    border-right:1px solid var(--line);
+    position:relative;
+  }
+  .status-cell:last-child{border-right:none;}
+  .status-cell .k{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .status-cell .v{
+    font-family:var(--disp);
+    font-size:22px;
+    font-weight:500;
+  }
+  .status-cell.live .v{color:var(--green);}
+  .status-cell.live .v::before{
+    content:"●";
+    font-size:10px;
+    margin-right:8px;
+    animation:blink 2s infinite;
+  }
+  @keyframes blink{50%{opacity:.25;}}
+
+  /* ===== About ===== */
+  .about-grid{
+    display:grid;
+    grid-template-columns:1.4fr 1fr;
+    gap:48px;
+  }
+  @media (max-width:800px){.about-grid{grid-template-columns:1fr;}}
+  .about-grid p{color:var(--text); font-size:16px; max-width:60ch;}
+  .about-grid p + p{margin-top:16px;}
+  .spec-plate{
+    border:1px solid var(--line);
+    background:var(--panel);
+    padding:22px;
+    align-self:start;
+  }
+  .spec-plate .k{font-family:var(--mono); font-size:10.5px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;}
+  .spec-row{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:12.5px;}
+  .spec-row:last-child{border-bottom:none;}
+  .spec-row .label{color:var(--muted);}
+
+  /* ===== Experience ===== */
+  .job{
+    border-left:2px solid var(--line);
+    padding:4px 0 4px 26px;
+    margin-bottom:44px;
+    position:relative;
+  }
+  .job::before{
+    content:"";
+    position:absolute; left:-6px; top:8px;
+    width:10px; height:10px;
+    background:var(--bg);
+    border:2px solid var(--amber);
+  }
+  .job:last-child{margin-bottom:0;}
+  .job-head{display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; align-items:baseline; margin-bottom:6px;}
+  .job-title{font-family:var(--disp); font-size:22px; font-weight:600; text-transform:uppercase;}
+  .job-meta{font-family:var(--mono); font-size:12px; color:var(--muted);}
+  .job-org{color:var(--amber); font-family:var(--mono); font-size:13px; margin-bottom:14px;}
+  ul.job-list{list-style:none; display:flex; flex-direction:column; gap:9px;}
+  ul.job-list li{padding-left:18px; position:relative; font-size:15px;}
+  ul.job-list li::before{content:"›"; position:absolute; left:0; color:var(--amber);}
+
+  /* ===== Projects ===== */
+  .proj-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(280px,1fr));
+    gap:20px;
+  }
+  .proj-card{
+    border:1px solid var(--line);
+    background:var(--panel);
+    padding:24px;
+    transition:.2s;
+  }
+  .proj-card:hover{border-color:var(--amber); background:var(--panel-2);}
+  .proj-tag{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:12px; display:block;}
+  .proj-card h3{font-family:var(--disp); font-size:19px; text-transform:uppercase; margin-bottom:10px; font-weight:600;}
+  .proj-card p{font-size:14px; color:var(--muted);}
+
+  /* ===== Skills ===== */
+  .skills-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .skill-block{background:var(--panel); padding:22px;}
+  .skill-block h4{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--amber); margin-bottom:14px;}
+  .skill-block ul{list-style:none; display:flex; flex-direction:column; gap:8px;}
+  .skill-block li{font-size:14.5px; padding-left:14px; position:relative;}
+  .skill-block li::before{content:"—"; position:absolute; left:0; color:var(--muted);}
+
+  /* ===== Education / Certs ===== */
+  .cred-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  @media (max-width:700px){.cred-grid{grid-template-columns:1fr;}}
+  .cred{border:1px solid var(--line); background:var(--panel); padding:22px;}
+  .cred .k{font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px;}
+  .cred h3{font-family:var(--disp); font-size:18px; text-transform:uppercase; margin-bottom:4px;}
+  .cred p{font-size:13.5px; color:var(--muted);}
+
+  /* ===== Contact ===== */
+  .contact{display:flex; flex-wrap:wrap; gap:16px 40px; align-items:flex-end; justify-content:space-between;}
+  .contact-links{display:flex; flex-direction:column; gap:10px;}
+  .contact-links a{
+    font-family:var(--mono);
+    font-size:14px;
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    padding-bottom:2px;
+    width:max-content;
+  }
+  .contact-links a:hover{border-color:var(--amber); color:var(--amber);}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <nav class="rail">
+    <div class="brand">Shohag<br><span>Hossain</span></div>
+    <ul class="rail-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#certifications">Certifications</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="rail-foot">
+      <div><span class="dot">●</span> UNIT STATUS: OPERATIONAL</div>
+      <div>MAITREE STPP · 2×660 MW</div>
+      <div>KHULNA, BANGLADESH</div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-inner">
+        <div class="eyebrow">Fuel Management Dept. — Deputy Manager, Grade-6</div>
+        <h1>Shohag<br>Hossain</h1>
+        <div class="role">Mechanical Engineer — Coal Handling Plant Operations &amp; Shift Management</div>
+      </div>
+      <div class="status-panel">
+        <div class="status-cell live">
+          <div class="k">Current Shift Role</div>
+          <div class="v">Shift Incharge</div>
+        </div>
+        <div class="status-cell">
+          <div class="k">Plant Capacity</div>
+          <div class="v">2 × 660 MW</div>
+        </div>
+        <div class="status-cell">
+          <div class="k">Coal Blend</div>
+          <div class="v">ICI2 / ICI3</div>
+        </div>
+        <div class="status-cell">
+          <div class="k">Experience</div>
+          <div class="v">5+ Years</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="eyebrow">About</div>
+      <h2 class="section-title">Profile</h2>
+      <div class="about-grid">
+        <div>
+          <p>I'm a Deputy Manager (Grade-6) in the Fuel Management Department at BIFPCL's Maitree Super Thermal Power Plant, working in Coal Handling Plant (CHP) operations with rotating shift-incharge responsibilities across morning, evening, and night shifts.</p>
+          <p>My work centers on keeping fuel supply reliable and safe — from blending Indonesian coal grades to hold boiler performance within margin, to running accident analysis across conveyors, stackers, reclaimers, and ship unloaders. I was field-level engineer on the commissioning of Bangladesh's first 1320 MW ultra-supercritical coal power plant, and trained on supercritical plant operations at NTPC in India. Earlier roles at Renata Limited (pharmaceutical HVAC &amp; utilities) and Samuda Chemical Complex shaped a disciplined, systems-first approach to plant reliability.</p>
+        </div>
+        <div class="spec-plate">
+          <div class="k" style="margin-bottom:14px;">Quick Spec</div>
+          <div class="spec-row"><span class="label">Employer</span><span>BIFPCL</span></div>
+          <div class="spec-row"><span class="label">Site</span><span>Maitree STPP</span></div>
+          <div class="spec-row"><span class="label">Dept.</span><span>Fuel Mgmt.</span></div>
+          <div class="spec-row"><span class="label">Grade</span><span>Deputy Mgr. (G-6)</span></div>
+          <div class="spec-row"><span class="label">Schedule</span><span>Rotating shifts</span></div>
+          <div class="spec-row"><span class="label">Prior role</span><span>Renata Ltd. — HVAC</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="experience">
+      <div class="eyebrow">Professional Experience</div>
+      <h2 class="section-title">Work History</h2>
+
+      <div class="job">
+        <div class="job-head">
+          <div class="job-title">Deputy Manager, Fuel Management</div>
+          <div class="job-meta">Current</div>
+        </div>
+        <div class="job-org">BIFPCL — Maitree Super Thermal Power Plant (2×660 MW)</div>
+        <ul class="job-list">
+          <li>Supervise Coal Handling Plant operations across rotating shifts, including shift-incharge duties</li>
+          <li>Manage coal blending strategy — blending ICI2 (NAR 5500) and ICI3 (NAR 5200) Indonesian grades to maintain safe boiler performance margins</li>
+          <li>Lead night-shift accident analysis across conveyors, stackers, reclaimers, ship unloaders, and heavy vehicle operations</li>
+          <li>Troubleshoot plant equipment issues, including conveyor discharge chute and pneumatic system faults</li>
+          <li>Draft operational safety communications and maintenance instructions for CHP staff</li>
+        </ul>
+      </div>
+
+      <div class="job">
+        <div class="job-head">
+          <div class="job-title">Assistant Manager, Operation &amp; Maintenance (CHP)</div>
+          <div class="job-meta">Sep 2022 – 2024</div>
+        </div>
+        <div class="job-org">BIFPCL — Khulna, Bangladesh</div>
+        <ul class="job-list">
+          <li>Field-level engineer on the mega-construction project for Bangladesh's first 1320 MW ultra-supercritical coal power plant</li>
+          <li>Involved in Portal Reclaimer and Ship Unloader commissioning (Manufacturer: TEKRAF)</li>
+          <li>Developed and refined preventive and predictive maintenance programs to minimize downtime</li>
+          <li>Ensured safe isolation of equipment for electrical/mechanical services and regulatory compliance</li>
+          <li>Assessed mechanical system capacities and planned for future operational growth</li>
+          <li>Prepared management reports on system performance, improvement opportunities, and waste reduction</li>
+          <li>Led a 35-person operations team, delegating work daily by skill set</li>
+        </ul>
+      </div>
+
+      <div class="job">
+        <div class="job-head">
+          <div class="job-title">Engineering Executive (Training Deputation)</div>
+          <div class="job-meta">Dec 2020 – Jan 2022</div>
+        </div>
+        <div class="job-org">National Power Training Institute (NTPC) — Faridabad, Haryana, India · via BIFPCL</div>
+        <ul class="job-list">
+          <li>Trained in operation and maintenance of supercritical thermal power plants, theoretically and on-site</li>
+        </ul>
+      </div>
+
+      <div class="job">
+        <div class="job-head">
+          <div class="job-title">Senior Officer, Engineering Department</div>
+          <div class="job-meta">Jun 2020 – Aug 2022</div>
+        </div>
+        <div class="job-org">Renata Limited (formerly Pfizer Limited) — Mymensingh, Bangladesh</div>
+        <ul class="job-list">
+          <li>Installed and commissioned mechanical equipment — chillers, cooling towers, dust collectors, air compressors, air dryers, vacuum pumps, HVAC, fire protection, and piping systems</li>
+          <li>Operated and maintained HVAC systems, chillers, exhaust fans, and DG sets</li>
+          <li>Identified and implemented energy efficiency and sustainability improvements</li>
+          <li>Oversaw the maintenance budget and maintained repair, maintenance, and spare-parts records</li>
+          <li>Ran root-cause analysis to plan improvement projects; authored SOPs and EOPs</li>
+          <li>Sourced and managed outside manufacturers, suppliers, and vendors</li>
+          <li>Trained and mentored junior officers, improving team efficiency</li>
+        </ul>
+      </div>
+
+      <div class="job">
+        <div class="job-head">
+          <div class="job-title">Engineer</div>
+          <div class="job-meta">Nov 2019 – Jun 2020</div>
+        </div>
+        <div class="job-org">Samuda Chemical Complex Limited — Dhaka, Bangladesh</div>
+        <ul class="job-list">
+          <li>Executed installation works with a foreign team, ensuring safe operation of mechanical machinery</li>
+          <li>Conducted safety pep talks for workers</li>
+          <li>Prepared scope of work and maintenance protocols for repairs</li>
+          <li>Diagnosed and troubleshot device malfunctions</li>
+        </ul>
+      </div>
+
+      <div class="job">
+        <div class="job-head">
+          <div class="job-title">Automobile Assembly Intern</div>
+          <div class="job-meta">May 2017 – Jul 2017</div>
+        </div>
+        <div class="job-org">Runner Motors Limited — Mymensingh, Bangladesh</div>
+        <ul class="job-list">
+          <li>Worked across engine assembly, heat treatment, denting/painting, fabrication, and pre-delivery inspection of heavy vehicles</li>
+          <li>Designed a production line-up for the plant while minimizing associated costs</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="eyebrow">Selected Work</div>
+      <h2 class="section-title">Projects</h2>
+      <div class="proj-grid">
+        <div class="proj-card">
+          <span class="proj-tag">Fuel Quality</span>
+          <h3>Coal Blending Optimization</h3>
+          <p>Developed a blending approach for ICI2/ICI3 Indonesian coal grades to hold boiler NAR performance within safe operating margins, working through chevron stacking mechanics and particle segregation.</p>
+        </div>
+        <div class="proj-card">
+          <span class="proj-tag">Safety</span>
+          <h3>CHP Safety &amp; Accident Analysis</h3>
+          <p>Built out a safety management framework for CHP operations, including systematic night-shift accident analysis across conveyor, stacker/reclaimer, and ship-unloading systems.</p>
+        </div>
+        <div class="proj-card">
+          <span class="proj-tag">Maintenance</span>
+          <h3>Equipment Fault Troubleshooting</h3>
+          <p>Diagnosed and resolved operational faults such as discharge chute air-pipe disconnections, minimizing downtime on critical coal handling equipment.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills">
+      <div class="eyebrow">Capabilities</div>
+      <h2 class="section-title">Software &amp; Technical Skills</h2>
+      <div class="skills-grid">
+        <div class="skill-block">
+          <h4>Design &amp; Simulation</h4>
+          <ul>
+            <li>AutoCAD</li>
+            <li>SolidWorks</li>
+            <li>HAP — cooling load calculation</li>
+          </ul>
+        </div>
+        <div class="skill-block">
+          <h4>Office &amp; Reporting</h4>
+          <ul>
+            <li>MS Word, Excel, PowerPoint</li>
+            <li>SOP / EOP documentation</li>
+            <li>Maintenance &amp; budget tracking</li>
+          </ul>
+        </div>
+        <div class="skill-block">
+          <h4>Operations</h4>
+          <ul>
+            <li>Shift &amp; crew management (35+ team)</li>
+            <li>Safety incident &amp; root-cause analysis</li>
+            <li>Coal blending &amp; fuel quality</li>
+            <li>Preventive &amp; predictive maintenance</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="education">
+      <div class="eyebrow">Background</div>
+      <h2 class="section-title">Education &amp; Certifications</h2>
+      <div class="cred-grid">
+        <div class="cred">
+          <div class="k">Education</div>
+          <h3>BSc in Mechanical Engineering</h3>
+          <p>Rajshahi University of Engineering &amp; Technology (RUET)<br>Mar 2014 – Dec 2018 · GPA 3.19/4.00</p>
+        </div>
+        <div class="cred" id="certifications">
+          <div class="k">In Progress</div>
+          <h3>SREDA Certified Energy Auditor</h3>
+          <p>Preparing for the SREDA Certified Energy Auditor exam</p>
+        </div>
+        <div class="cred">
+          <div class="k">Professional Development</div>
+          <h3>PMI Study Hall Plus</h3>
+          <p>Active subscription — ongoing PM skill development</p>
+        </div>
+        <div class="cred">
+          <div class="k">Certification</div>
+          <h3>PMP</h3>
+          <p>Project Management Institute — June 2026</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" style="border-bottom:none;">
+      <div class="eyebrow">Get In Touch</div>
+      <h2 class="section-title">Contact</h2>
+      <div class="contact">
+        <p style="color:var(--muted); max-width:40ch;">Open to conversations on fuel management, CHP operations, and power plant reliability. Based in Khulna, Bangladesh.</p>
+        <div class="contact-links">
+          <a href="mailto:shohaghossainruet@gmail.com">shohaghossainruet@gmail.com</a>
+          <a href="tel:+8801755247511">+880 1755 247511</a>
+          <a href="https://www.linkedin.com/in/engr-shohag-hossain-144116105/" target="_blank">linkedin.com/in/engr-shohag-hossain</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</body>
+</html>
